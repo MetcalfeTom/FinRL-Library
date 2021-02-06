@@ -30,7 +30,6 @@ root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(""))))
 sys.path.append(root + "/python")
 
 
-
 # -----------------------------------------------------------------------------
 
 
@@ -92,7 +91,9 @@ def scrape_candles_to_csv(
 ):
     # instantiate the exchange by id
     exchange = getattr(ccxt, exchange_id)(
-        {"enableRateLimit": True,}  # required by the Manual
+        {
+            "enableRateLimit": True,
+        }  # required by the Manual
     )
     # convert since from string to milliseconds integer if needed
     if isinstance(since, str):

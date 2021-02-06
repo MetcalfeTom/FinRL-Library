@@ -114,22 +114,23 @@ from finrl.marketdata.yahoodownloader import YahooDownloader
 from finrl.model.models import DRLAgent
 from finrl.preprocessing.data import data_split
 from finrl.preprocessing.preprocessors import FeatureEngineer
-from finrl.trade.backtest import (backtest_plot, backtest_stats, get_baseline,
-                                  get_daily_return)
+from finrl.trade.backtest import (
+    backtest_plot,
+    backtest_stats,
+    get_baseline,
+    get_daily_return,
+)
 
 get_ipython().run_line_magic("matplotlib", "inline")
 
 
-
 sys.path.append("../FinRL-Library")
-
 
 
 # <a id='1.4'></a>
 # ## 2.4. Create Folders
 
 # In[ ]:
-
 
 
 if not os.path.exists("./" + config.DATA_SAVE_DIR):

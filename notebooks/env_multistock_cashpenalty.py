@@ -75,6 +75,7 @@
 
 # matplotlib.use('Agg')
 import datetime
+
 # for this example, let's do multiprocessing with n_cores-2
 import multiprocessing
 import os
@@ -100,7 +101,6 @@ sys.path.append("..")
 # In[2]:
 
 
-
 print(pd.__version__)
 
 
@@ -123,17 +123,13 @@ print(pd.__version__)
 # In[4]:
 
 
-
-
 get_ipython().run_line_magic("matplotlib", "inline")
-
 
 
 # <a id='1.4'></a>
 # ## 2.4. Create Folders
 
 # In[8]:
-
 
 
 if not os.path.exists("./" + config.DATA_SAVE_DIR):
@@ -337,7 +333,6 @@ e_trade_gym = StockTradingEnvCashpenalty(
 #
 
 # In[50]:
-
 
 
 n_cores = multiprocessing.cpu_count() - 2

@@ -36,7 +36,7 @@ class StockTradingEnvCashpenalty(gym.Env):
         initial_amount: (int, float): Amount of cash initially available
         daily_information_columns (list(str)): Columns to use when building state space from the dataframe. It could be OHLC columns or any other variables such as technical indicators and turbulence index
         cash_penalty_proportion (int, float): Penalty to apply if the algorithm runs out of cash
-        patient (bool): option to choose whether end the cycle when we're running out of cash or just don't buy anything until we got additional cash 
+        patient (bool): option to choose whether end the cycle when we're running out of cash or just don't buy anything until we got additional cash
     action space: <share_dollar_purchases>
     TODO:
         add holdings to memory
@@ -171,7 +171,8 @@ class StockTradingEnvCashpenalty(gym.Env):
         logger.record("environment/total_reward_pct", (reward_pct - 1) * 100)
         logger.record("environment/total_trades", self.sum_trades)
         logger.record(
-            "environment/avg_daily_trades", self.sum_trades / (self.current_step),
+            "environment/avg_daily_trades",
+            self.sum_trades / (self.current_step),
         )
         logger.record(
             "environment/avg_daily_trades_per_asset",

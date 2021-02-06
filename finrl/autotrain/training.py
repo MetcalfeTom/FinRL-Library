@@ -17,7 +17,6 @@ from finrl.trade.backtest import BackTestStats
 matplotlib.use("Agg")
 
 
-
 def train_one():
     """
     train an agent

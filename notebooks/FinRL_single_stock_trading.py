@@ -103,6 +103,7 @@ get_ipython().system(
 import datetime
 import os
 import sys
+
 # Diable the warnings
 import warnings
 
@@ -122,12 +123,10 @@ from finrl.trade.backtest import backtest_plot, backtest_stats, baseline_stats
 matplotlib.use("Agg")
 
 
-
 sys.path.append("../FinRL-Library")
 
 
 # In[2]:
-
 
 
 warnings.filterwarnings("ignore")
@@ -137,7 +136,6 @@ warnings.filterwarnings("ignore")
 # ## 2.4. Create Folders
 
 # In[3]:
-
 
 
 if not os.path.exists("./" + config.DATA_SAVE_DIR):

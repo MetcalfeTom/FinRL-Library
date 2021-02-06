@@ -109,7 +109,6 @@ sys.path.append("..")
 # In[2]:
 
 
-
 print(pd.__version__)
 
 
@@ -132,17 +131,13 @@ print(pd.__version__)
 # In[3]:
 
 
-
-
 get_ipython().run_line_magic("matplotlib", "inline")
-
 
 
 # <a id='1.4'></a>
 # ## 2.4. Create Folders
 
 # In[4]:
-
 
 
 if not os.path.exists("./" + config.DATA_SAVE_DIR):
@@ -271,13 +266,11 @@ print(len(trade))
 # In[223]:
 
 
-
 milliseconds = int(round(time.time() * 1000))
 print(milliseconds)
 
 
 # In[224]:
-
 
 
 matplotlib.use("Agg")
@@ -296,16 +289,16 @@ class StockTradingEnvV2(gym.Env):
         hmax (int): max number of share purchases allowed per asset
         turbulence_threshold (float): Maximum turbulence allowed in market for purchases to occur. If exceeded, positions are liquidated
         print_verbosity(int): When iterating (step), how often to print stats about state of env
-        reward_scaling (float): Scaling value to multiply reward by at each step. 
+        reward_scaling (float): Scaling value to multiply reward by at each step.
         initial_amount: (int, float): Amount of cash initially available
-        daily_information_columns (list(str)): Columns to use when building state space from the dataframe. 
+        daily_information_columns (list(str)): Columns to use when building state space from the dataframe.
         out_of_cash_penalty (int, float): Penalty to apply if the algorithm runs out of cash
-    
+
     action space: <share_dollar_purchases>
-    
+
     TODO:
         property for date index - starting point
-        
+
 
     tests:
         after reset, static strategy should result in same metrics
@@ -556,7 +549,8 @@ class StockTradingEnvV2(gym.Env):
             # if we run out of cash, end the cycle and penalize
             if (spend + costs) > coh:
                 return self.return_terminal(
-                    reason="CASH SHORTAGE", reward=self.out_of_cash_penalty,
+                    reason="CASH SHORTAGE",
+                    reward=self.out_of_cash_penalty,
                 )
 
             # verify we didn't do anything impossible here
@@ -719,7 +713,6 @@ print(config.PPO_PARAMS)
 #
 
 # In[160]:
-
 
 
 ppo_params = {

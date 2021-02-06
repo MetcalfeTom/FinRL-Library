@@ -123,21 +123,16 @@ warnings.filterwarnings("ignore")
 # In[3]:
 
 
-
-
 get_ipython().run_line_magic("matplotlib", "inline")
 
 
-
 sys.path.append("../FinRL-Library")
-
 
 
 # <a id='1.4'></a>
 # ## 2.4. Create Folders
 
 # In[4]:
-
 
 
 if not os.path.exists("./" + config.DATA_SAVE_DIR):

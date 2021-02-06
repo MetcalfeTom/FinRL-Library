@@ -118,13 +118,16 @@ from finrl.marketdata.yahoodownloader import YahooDownloader
 from finrl.model.models import DRLAgent
 from finrl.preprocessing.data import data_split
 from finrl.preprocessing.preprocessors import FeatureEngineer
-from finrl.trade.backtest import (BackTestPlot, BackTestStats, BaselineStats,
-                                  backtest_strat, baseline_strat)
+from finrl.trade.backtest import (
+    BackTestPlot,
+    BackTestStats,
+    BaselineStats,
+    backtest_strat,
+    baseline_strat,
+)
 from pyfolio import timeseries
 
 matplotlib.use("Agg")
-
-
 
 
 sys.path.append("../FinRL-Library")
@@ -134,7 +137,6 @@ sys.path.append("../FinRL-Library")
 # ## 2.4. Create Folders
 
 # In[4]:
-
 
 
 if not os.path.exists("./" + config.DATA_SAVE_DIR):
@@ -274,7 +276,6 @@ train.head()
 # In[23]:
 
 
-
 matplotlib.use("Agg")
 
 
@@ -313,7 +314,7 @@ class StockPortfolioEnv(gym.Env):
     _buy_stock()
         perform buy action based on the sign of the action
     step()
-        at each step the agent will return actions, then 
+        at each step the agent will return actions, then
         we will calculate the reward, and return the next observation.
     reset()
         reset the environment
@@ -323,7 +324,7 @@ class StockPortfolioEnv(gym.Env):
         return account value at each time step
     save_action_memory()
         return actions/positions at each time step
-        
+
 
     """
 
@@ -727,7 +728,6 @@ df_actions.to_csv("df_actions.csv")
 # In[36]:
 
 
-
 DRL_strat = backtest_strat(df_daily_return)
 perf_func = timeseries.perf_stats
 perf_stats_all = perf_func(
@@ -765,7 +765,6 @@ dji, dow_strat = baseline_strat("^DJI", "2019-01-01", "2021-01-01")
 
 
 # In[42]:
-
 
 
 get_ipython().run_line_magic("matplotlib", "inline")

@@ -23,7 +23,10 @@ def get_daily_return(df, value_col_name="account_value"):
 def backtest_stats(account_value, value_col_name="account_value"):
     dr_test = get_daily_return(account_value, value_col_name=value_col_name)
     perf_stats_all = timeseries.perf_stats(
-        returns=dr_test, positions=None, transactions=None, turnover_denom="AGB",
+        returns=dr_test,
+        positions=None,
+        transactions=None,
+        turnover_denom="AGB",
     )
     print(perf_stats_all)
     return perf_stats_all

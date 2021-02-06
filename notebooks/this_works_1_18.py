@@ -108,7 +108,6 @@ sys.path.append("..")
 # In[2]:
 
 
-
 print(pd.__version__)
 
 
@@ -131,17 +130,13 @@ print(pd.__version__)
 # In[3]:
 
 
-
-
 get_ipython().run_line_magic("matplotlib", "inline")
-
 
 
 # <a id='1.4'></a>
 # ## 2.4. Create Folders
 
 # In[4]:
-
 
 
 if not os.path.exists("./" + config.DATA_SAVE_DIR):
@@ -259,7 +254,6 @@ print(len(trade))
 
 
 # In[12]:
-
 
 
 matplotlib.use("Agg")

@@ -107,7 +107,6 @@ sys.path.append("..")
 # In[2]:
 
 
-
 print(pd.__version__)
 
 
@@ -130,17 +129,13 @@ print(pd.__version__)
 # In[33]:
 
 
-
-
 get_ipython().run_line_magic("matplotlib", "inline")
-
 
 
 # <a id='1.4'></a>
 # ## 2.4. Create Folders
 
 # In[34]:
-
 
 
 if not os.path.exists("./" + config.DATA_SAVE_DIR):
@@ -287,7 +282,6 @@ config.TECHNICAL_INDICATORS_LIST
 # In[114]:
 
 
-
 matplotlib.use("Agg")
 
 matplotlib.use("Agg")
@@ -304,11 +298,11 @@ class StockTradingEnvV2(gym.Env):
         hmax (int): max number of share purchases allowed per asset
         turbulence_threshold (float): Maximum turbulence allowed in market for purchases to occur. If exceeded, positions are liquidated
         print_verbosity(int): When iterating (step), how often to print stats about state of env
-        reward_scaling (float): Scaling value to multiply reward by at each step. 
+        reward_scaling (float): Scaling value to multiply reward by at each step.
         initial_amount: (int, float): Amount of cash initially available
-        daily_information_columns (list(str)): Columns to use when building state space from the dataframe. 
+        daily_information_columns (list(str)): Columns to use when building state space from the dataframe.
         out_of_cash_penalty (int, float): Penalty to apply if the algorithm runs out of cash
-    
+
 
 
     tests:
@@ -521,7 +515,8 @@ class StockTradingEnvV2(gym.Env):
             # if we run out of cash, end the cycle and penalize
             if (spend + costs) > coh:
                 return return_terminal(
-                    reason="CASH SHORTAGE", extra_reward=self.out_of_cash_penalty,
+                    reason="CASH SHORTAGE",
+                    extra_reward=self.out_of_cash_penalty,
                 )
 
             # verify we didn't do anything impossible here
@@ -680,7 +675,6 @@ print(config.PPO_PARAMS)
 
 
 # In[121]:
-
 
 
 ppo_params = {
