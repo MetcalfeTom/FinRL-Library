@@ -304,7 +304,9 @@ class StockTradingEnvV2(gym.Env):
         daily_reward=None,
         cash_penalty_proportion=0.1,
         random_start=True,
+        news_encodings = None
     ):
+        self.news_encodings = news_encodings or {}
         self.df = df
         self.stock_col = "tic"
         self.assets = df[self.stock_col].unique()
@@ -321,8 +323,9 @@ class StockTradingEnvV2(gym.Env):
         self.transaction_cost_pct = transaction_cost_pct
         self.reward_scaling = reward_scaling
         self.daily_information_cols = daily_information_cols
+        encoding_dim = len(news_encodings.values()[0]) if news_encodings else 0
         self.state_space = (
-            1 + len(self.assets) + len(self.assets) * len(self.daily_information_cols)
+            1 + len(self.assets) + len(self.assets) * len(self.daily_information_cols) + encoding_dim
         )
         self.action_space = spaces.Box(low=-1, high=1, shape=(len(self.assets),))
         self.observation_space = spaces.Box(
@@ -375,6 +378,11 @@ class StockTradingEnvV2(gym.Env):
             + [0] * len(self.assets)
             + self.get_date_vector(self.date_index)
         )
+        if self.news_encodings:
+            data = self.df.loc[self.date_index, :]
+            date = data.date.values[0]
+            encodings = self.news_encodings.get(date)
+            init_state += encodings
         self.state_memory.append(init_state)
         return init_state
 
@@ -534,6 +542,11 @@ class StockTradingEnvV2(gym.Env):
             state = (
                 [coh] + list(holdings_updated) + self.get_date_vector(self.date_index)
             )
+            if self.news_encodings:
+                data = self.df.loc[self.date_index, :]
+                date = data.date.values[0]
+                encodings = self.news_encodings.get(date)
+                state += encodings
             self.state_memory.append(state)
             reward = reward * self.reward_scaling
             return state, reward, False, {}
@@ -611,6 +624,8 @@ information_cols = [
     "dx_30",
     "turbulence",
 ]
+
+encodings = pd.read_csv("encodings.csv").to_dict("list")
 
 e_train_gym = StockTradingEnvV2(
     df=train,
