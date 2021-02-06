@@ -89,14 +89,17 @@ import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import torch
 from gym import spaces
 from gym.utils import seeding
 from stable_baselines3.common import logger
 from stable_baselines3.common.vec_env import DummyVecEnv, SubprocVecEnv
 
+# get_ipython().run_line_magic('matplotlib', 'inline')
 from finrl.config import config
-from finrl.env.env_stocktrading_v2 import StockTradingEnvV2
 from finrl.marketdata.yahoodownloader import YahooDownloader
+
+# from finrl.env.env_stocktrading_v2 import StockTradingEnvV2
 from finrl.model.models import DRLAgent
 from finrl.preprocessing.data import data_split
 from finrl.preprocessing.preprocessors import FeatureEngineer
@@ -104,12 +107,17 @@ from finrl.trade.backtest import backtest_plot, backtest_stats
 
 sys.path.append("..")
 
-
 # In[2]:
 
 
 print(pd.__version__)
 
+# In[3]:
+
+
+os.environ["CUDA_VISIBLE_DEVICES"] = "3"
+
+torch.cuda.is_available()
 
 #
 # <a id='1.2'></a>
@@ -127,16 +135,13 @@ print(pd.__version__)
 # <a id='1.3'></a>
 # ## 2.3. Import Packages
 
-# In[3]:
-
-
-get_ipython().run_line_magic("matplotlib", "inline")
+# In[4]:
 
 
 # <a id='1.4'></a>
 # ## 2.4. Create Folders
 
-# In[4]:
+# In[5]:
 
 
 if not os.path.exists("./" + config.DATA_SAVE_DIR):
@@ -147,7 +152,6 @@ if not os.path.exists("./" + config.TENSORBOARD_LOG_DIR):
     os.makedirs("./" + config.TENSORBOARD_LOG_DIR)
 if not os.path.exists("./" + config.RESULTS_DIR):
     os.makedirs("./" + config.RESULTS_DIR)
-
 
 # <a id='2'></a>
 # # Part 3. Download Data
@@ -178,40 +182,36 @@ if not os.path.exists("./" + config.RESULTS_DIR):
 #         Fetches data from yahoo API
 #
 
-# In[5]:
+# In[6]:
 
 
 # from config.py start_date is a string
 config.START_DATE
 
-
-# In[6]:
+# In[7]:
 
 
 # from config.py end_date is a string
 config.END_DATE
 
-
-# In[7]:
+# In[8]:
 
 
 print(config.DOW_30_TICKER)
 
-
-# In[8]:
+# In[9]:
 
 
 df = YahooDownloader(
     start_date="2009-01-01", end_date="2021-01-01", ticker_list=config.DOW_30_TICKER
 ).fetch_data()
 
-
 # # Part 4: Preprocess Data
 # Data preprocessing is a crucial step for training a high quality machine learning model. We need to check for missing data and do feature engineering in order to convert the data into a model-ready state.
 # * Add technical indicators. In practical trading, various information needs to be taken into account, for example the historical stock prices, current holding shares, technical indicators, etc. In this article, we demonstrate two trend-following technical indicators: MACD and RSI.
 # * Add turbulence index. Risk-aversion reflects whether an investor will choose to preserve the capital. It also influences one's trading strategy when facing different market volatility level. To control the risk in a worst-case scenario, such as financial crisis of 2007–2008, FinRL employs the financial turbulence index that measures extreme asset price fluctuation.
 
-# In[9]:
+# In[10]:
 
 
 fe = FeatureEngineer(
@@ -223,15 +223,13 @@ fe = FeatureEngineer(
 
 processed = fe.preprocess_data(df)
 
-
-# In[10]:
+# In[11]:
 
 
 processed["log_volume"] = np.log(processed.volume * processed.close)
 processed["change"] = (processed.close - processed.open) / processed.close
 processed["daily_variance"] = (processed.high - processed.low) / processed.close
 processed.head()
-
 
 # <a id='4'></a>
 # # Part 5. Design Environment
@@ -244,7 +242,7 @@ processed.head()
 # ## Training data split: 2009-01-01 to 2018-12-31
 # ## Trade data split: 2019-01-01 to 2020-09-30
 
-# In[11]:
+# In[12]:
 
 
 train = data_split(processed, "2009-01-01", "2019-01-01")
@@ -252,8 +250,7 @@ trade = data_split(processed, "2019-01-01", "2021-01-01")
 print(len(train))
 print(len(trade))
 
-
-# In[12]:
+# In[13]:
 
 
 matplotlib.use("Agg")
@@ -262,7 +259,6 @@ matplotlib.use("Agg")
 
 
 class StockTradingEnvV2(gym.Env):
-
     """
     A stock trading environment for OpenAI gym
     Parameters:
@@ -432,8 +428,8 @@ class StockTradingEnvV2(gym.Env):
             self.date_index - self.starting_point,
             reason,
             f"${int(self.account_information['total_assets'][-1])}",
-            f"{terminal_reward*100:0.5f}%",
-            f"{cash_pct*100:0.2f}%",
+            f"{terminal_reward * 100:0.5f}%",
+            f"{cash_pct * 100:0.2f}%",
         ]
 
         self.episode_history.append(rec)
@@ -580,11 +576,10 @@ class StockTradingEnvV2(gym.Env):
             )
 
 
-# In[13]:
+# In[14]:
 
 
 print(StockTradingEnvV2.__doc__)
-
 
 # #### state space
 # The state space of the observation is as follows
@@ -596,13 +591,12 @@ print(StockTradingEnvV2.__doc__)
 # The feature engineer adds indicators, and you can add your own as well.
 #
 
-# In[14]:
+# In[15]:
 
 
 processed.head()
 
-
-# In[15]:
+# In[16]:
 
 
 information_cols = [
@@ -631,9 +625,7 @@ e_train_gym = StockTradingEnvV2(
     random_start=True,
 )
 
-
 trade = data_split(processed, "2019-01-01", "2021-01-01")
-
 
 e_trade_gym = StockTradingEnvV2(
     df=trade,
@@ -647,7 +639,6 @@ e_trade_gym = StockTradingEnvV2(
     print_verbosity=500,
     random_start=False,
 )
-
 
 # ## Environment for Training
 # There are two available environments. The multiprocessing and the single processing env.
@@ -663,7 +654,7 @@ e_trade_gym = StockTradingEnvV2(
 # ```
 #
 
-# In[51]:
+# In[17]:
 
 
 # for this example, let's do multiprocessing with n_cores-2
@@ -681,7 +672,6 @@ env_train, _ = e_train_gym.get_multiproc_env(n=n_cores)
 # this is our observation environment. It allows full diagnostics
 env_trade, _ = e_trade_gym.get_sb_env()
 
-
 # <a id='5'></a>
 # # Part 6: Implement DRL Algorithms
 # * The implementation of the DRL algorithms are based on **OpenAI Baselines** and **Stable Baselines**. Stable Baselines is a fork of OpenAI Baselines, with a major structural refactoring, and code cleanups.
@@ -689,16 +679,15 @@ env_trade, _ = e_trade_gym.get_sb_env()
 # Multi-Agent DDPG, PPO, SAC, A2C and TD3. We also allow users to
 # design their own DRL algorithms by adapting these DRL algorithms.
 
-# In[53]:
+# In[18]:
 
 
 agent = DRLAgent(env=env_train)
 
-
 # ### Model PPO
 #
 
-# In[54]:
+# In[19]:
 
 
 # from torch.nn import Softsign, ReLU
@@ -717,17 +706,20 @@ policy_kwargs = {
 }
 
 model = agent.get_model(
-    "ppo", model_kwargs=ppo_params, policy_kwargs=policy_kwargs, verbose=0
+    "ppo", model_kwargs=ppo_params, policy_kwargs=policy_kwargs, verbose=1
 )
 
 # model = model.load("scaling_reward.model", env = env_train)
 
 
-# In[55]:
+# In[ ]:
 
+
+timesteps = 5000000
+# timesteps = 5000
 
 model.learn(
-    total_timesteps=5000000,
+    total_timesteps=timesteps,
     eval_env=env_trade,
     eval_freq=250,
     log_interval=1,
@@ -735,14 +727,12 @@ model.learn(
     n_eval_episodes=1,
 )
 
-
-# In[56]:
+# In[ ]:
 
 
 model.save("different.model")
 
-
-# In[57]:
+# In[ ]:
 
 
 data_turbulence = processed[
@@ -750,24 +740,20 @@ data_turbulence = processed[
 ]
 insample_turbulence = data_turbulence.drop_duplicates(subset=["date"])
 
-
-# In[58]:
+# In[ ]:
 
 
 insample_turbulence.turbulence.describe()
 
-
-# In[59]:
+# In[ ]:
 
 
 turbulence_threshold = np.quantile(insample_turbulence.turbulence.values, 1)
 
-
-# In[60]:
+# In[ ]:
 
 
 turbulence_threshold
-
 
 # ### Trade
 #
@@ -775,43 +761,37 @@ turbulence_threshold
 #
 # Numerous hyperparameters – e.g. the learning rate, the total number of samples to train on – influence the learning process and are usually determined by testing some variations.
 
-# In[61]:
+# In[ ]:
 
 
 trade.head()
 
-
-# In[192]:
+# In[ ]:
 
 
 e_trade_gym.hmax = 2500
 
-
-# In[193]:
+# In[ ]:
 
 
 print(len(e_trade_gym.dates))
 
-
-# In[194]:
+# In[ ]:
 
 
 df_account_value, df_actions = DRLAgent.DRL_prediction(
     model=model, environment=e_trade_gym
 )
 
-
-# In[195]:
+# In[ ]:
 
 
 df_account_value.shape
 
-
-# In[196]:
+# In[ ]:
 
 
 df_account_value.head(50)
-
 
 # <a id='6'></a>
 # # Part 7: Backtest Our Strategy
@@ -822,7 +802,7 @@ df_account_value.head(50)
 # pass in df_account_value, this information is stored in env class
 #
 
-# In[197]:
+# In[ ]:
 
 
 print("==============Get Backtest Results===========")
@@ -830,25 +810,30 @@ perf_stats_all = backtest_stats(
     account_value=df_account_value, value_col_name="total_assets"
 )
 
-
 # <a id='6.2'></a>
 # ## 7.2 BackTestPlot
 
-# In[198]:
+# In[ ]:
 
 
 print("==============Compare to DJIA===========")
-get_ipython().run_line_magic("matplotlib", "inline")
+# get_ipython().run_line_magic('matplotlib', 'inline')
 # S&P 500: ^GSPC
 # Dow Jones Index: ^DJI
 # NASDAQ 100: ^NDX
-backtest_plot(
+plot = backtest_plot(
     df_account_value,
     baseline_ticker="^DJI",
     baseline_start="2019-01-01",
     baseline_end="2021-01-01",
     value_col_name="total_assets",
 )
+print(plot)
+
+# In[ ]:
+
+
+# In[ ]:
 
 
 # In[ ]:
