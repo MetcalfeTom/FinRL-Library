@@ -1,8 +1,10 @@
 import unittest
-from finrl.marketdata.yahoodownloader import YahooDownloader
-from finrl.env.env_stocktrading_cashpenalty import StockTradingEnvCashpenalty
+
 import numpy as np
 import pandas as pd
+
+from finrl.env.env_stocktrading_cashpenalty import StockTradingEnvCashpenalty
+from finrl.marketdata.yahoodownloader import YahooDownloader
 
 
 class TestStocktradingEnvCashpenalty(unittest.TestCase):

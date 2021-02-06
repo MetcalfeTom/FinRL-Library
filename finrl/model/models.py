@@ -1,36 +1,28 @@
 # common library
-import pandas as pd
-import numpy as np
 import time
+
 import gym
+import numpy as np
+import pandas as pd
+from stable_baselines3 import A2C, DDPG, PPO, SAC, TD3
+from stable_baselines3.common.noise import (NormalActionNoise,
+                                            OrnsteinUhlenbeckActionNoise)
+from stable_baselines3.common.vec_env import DummyVecEnv
+from stable_baselines3.ppo import MlpPolicy
+from stable_baselines3.td3.policies import MlpPolicy
+
+from finrl.config import config
+from finrl.env.env_stocktrading import StockTradingEnv
+from finrl.preprocessing.data import data_split
 
 # RL models from stable-baselines
 # from stable_baselines import SAC
 # from stable_baselines import TD3
 
-from stable_baselines3.ppo import MlpPolicy
-from stable_baselines3.common.vec_env import DummyVecEnv
 
-from stable_baselines3 import DDPG
-from stable_baselines3.common.noise import (
-    NormalActionNoise,
-    OrnsteinUhlenbeckActionNoise,
-)
 
-from finrl.config import config
-from finrl.preprocessing.data import data_split
-from finrl.env.env_stocktrading import StockTradingEnv
 
-from stable_baselines3 import A2C
-from stable_baselines3 import PPO
-from stable_baselines3 import TD3
-from stable_baselines3.td3.policies import MlpPolicy
-from stable_baselines3.common.noise import (
-    NormalActionNoise,
-    OrnsteinUhlenbeckActionNoise,
-)
 
-from stable_baselines3 import SAC
 
 
 MODELS = {"a2c": A2C, "ddpg": DDPG, "td3": TD3, "sac": SAC, "ppo": PPO}

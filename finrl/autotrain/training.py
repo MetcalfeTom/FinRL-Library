@@ -1,19 +1,21 @@
-import pandas as pd
-import numpy as np
-import matplotlib
-import matplotlib.pyplot as plt
-from sklearn import preprocessing
-
-matplotlib.use("Agg")
 import datetime
 
+import matplotlib
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+from sklearn import preprocessing
+
 from finrl.config import config
-from finrl.marketdata.yahoodownloader import YahooDownloader
-from finrl.preprocessing.preprocessors import FeatureEngineer
-from finrl.preprocessing.data import data_split
 from finrl.env.env_stocktrading import StockTradingEnv
+from finrl.marketdata.yahoodownloader import YahooDownloader
 from finrl.model.models import DRLAgent
+from finrl.preprocessing.data import data_split
+from finrl.preprocessing.preprocessors import FeatureEngineer
 from finrl.trade.backtest import BackTestStats
+
+matplotlib.use("Agg")
+
 
 
 def train_one():

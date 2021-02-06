@@ -1,6 +1,8 @@
 import unittest
-from finrl.marketdata.yahoodownloader import YahooDownloader
+
 import pandas as pd
+
+from finrl.marketdata.yahoodownloader import YahooDownloader
 
 
 class TestDownloader(unittest.TestCase):

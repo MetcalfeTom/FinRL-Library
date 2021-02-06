@@ -1,9 +1,9 @@
+import datetime
 import json
 import logging
 import os
 import time
 from argparse import ArgumentParser
-import datetime
 
 from finrl.config import config
 
