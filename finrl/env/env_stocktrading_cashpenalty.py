@@ -5,12 +5,15 @@ from gym.utils import seeding
 import gym
 from gym import spaces
 import matplotlib
+
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import random
 from stable_baselines3.common.vec_env import DummyVecEnv, SubprocVecEnv
 from stable_baselines3.common import logger
 import time
+
+
 class StockTradingEnvCashpenalty(gym.Env):
     """
     A stock trading environment for OpenAI gym
@@ -41,7 +44,9 @@ class StockTradingEnvCashpenalty(gym.Env):
         after reset, static strategy should result in same metrics
         given no change in prices, no change in asset values
     """
+
     metadata = {"render.modes": ["human"]}
+
     def __init__(
         self,
         df,
@@ -98,13 +103,16 @@ class StockTradingEnvCashpenalty(gym.Env):
                 self.get_date_vector(i) for i, _ in enumerate(self.dates)
             ]
             print("data cached!")
+
     def seed(self, seed=None):
         if seed is None:
             seed = int(round(time.time() * 1000))
         random.seed(seed)
+
     @property
     def current_step(self):
         return self.date_index - self.starting_point
+
     def reset(self):
         self.seed()
         self.sum_trades = 0
@@ -132,6 +140,7 @@ class StockTradingEnvCashpenalty(gym.Env):
         )
         self.state_memory.append(init_state)
         return init_state
+
     def get_date_vector(self, date, cols=None):
         if (cols is None) and (self.cached_data is not None):
             return self.cached_data[date]
@@ -146,12 +155,13 @@ class StockTradingEnvCashpenalty(gym.Env):
                 v += subset.loc[date, cols].tolist()
             assert len(v) == len(self.assets) * len(cols)
             return v
+
     def return_terminal(self, reason="Last Date", reward=0):
         state = self.state_memory[-1]
         self.log_step(reason=reason, terminal_reward=reward)
         # Add outputs to logger interface
         gl_pct = self.account_information["total_assets"][-1] / self.initial_amount
-        logger.record("environment/GainLoss_pct",(gl_pct - 1)*100)
+        logger.record("environment/GainLoss_pct", (gl_pct - 1) * 100)
         logger.record(
             "environment/total_assets",
             int(self.account_information["total_assets"][-1]),
@@ -160,8 +170,7 @@ class StockTradingEnvCashpenalty(gym.Env):
         logger.record("environment/total_reward_pct", (reward_pct - 1) * 100)
         logger.record("environment/total_trades", self.sum_trades)
         logger.record(
-            "environment/avg_daily_trades",
-            self.sum_trades / (self.current_step),
+            "environment/avg_daily_trades", self.sum_trades / (self.current_step),
         )
         logger.record(
             "environment/avg_daily_trades_per_asset",
@@ -177,6 +186,7 @@ class StockTradingEnvCashpenalty(gym.Env):
             / self.account_information["total_assets"][-1],
         )
         return state, reward, True, {}
+
     def log_step(self, reason, terminal_reward=None):
         if terminal_reward is None:
             terminal_reward = self.account_information["reward"][-1]
@@ -197,6 +207,7 @@ class StockTradingEnvCashpenalty(gym.Env):
         ]
         self.episode_history.append(rec)
         print(self.template.format(*rec))
+
     def log_header(self):
         self.template = "{0:4}|{1:4}|{2:15}|{3:15}|{4:15}|{5:10}|{6:10}|{7:10}"  # column widths: 8, 10, 15, 7, 10
         print(
@@ -212,6 +223,7 @@ class StockTradingEnvCashpenalty(gym.Env):
             )
         )
         self.printed_header = True
+
     def get_reward(self):
         if self.current_step == 0:
             return 0
@@ -223,6 +235,7 @@ class StockTradingEnvCashpenalty(gym.Env):
             reward = (assets / self.initial_amount) - 1
             reward /= self.current_step
             return reward
+
     def step(self, actions):
         # let's just log what we're doing in terms of max actions at each step.
         self.sum_trades += np.sum(np.abs(actions))
@@ -268,13 +281,14 @@ class StockTradingEnvCashpenalty(gym.Env):
                 actions = np.where(closings > 0, actions // closings, 0)
                 actions = actions.astype(int)
                 # round down actions to the nearest multiplies of shares_increment
-                actions = np.where(actions >= 0,
-                                (actions // self.shares_increment) * self.shares_increment,
-                                ((actions + self.shares_increment) // self.shares_increment) * self.shares_increment)
+                actions = np.where(
+                    actions >= 0,
+                    (actions // self.shares_increment) * self.shares_increment,
+                    ((actions + self.shares_increment) // self.shares_increment)
+                    * self.shares_increment,
+                )
             else:
                 actions = np.where(closings > 0, actions / closings, 0)
-
-
 
             # clip actions so we can't sell more assets than we hold
             actions = np.maximum(actions, -np.array(holdings))
@@ -287,18 +301,18 @@ class StockTradingEnvCashpenalty(gym.Env):
             buys = np.clip(actions, 0, np.inf)
             spend = np.dot(buys, closings)
             costs += spend * self.buy_cost_pct
-             # if we run out of cash...
+            # if we run out of cash...
             if (spend + costs) > coh:
                 if self.patient:
                     # ... just don't buy anything until we got additional cash
                     self.log_step(reason="CASH SHORTAGE")
-                    actions = np.where(actions>0,0,actions)
+                    actions = np.where(actions > 0, 0, actions)
                     spend = 0
                     costs = 0
                 else:
                     # ... end the cycle and penalize
                     return self.return_terminal(
-                        reason="CASH SHORTAGE",reward=self.get_reward()
+                        reason="CASH SHORTAGE", reward=self.get_reward()
                     )
             self.transaction_memory.append(actions)  # capture what the model's could do
             # verify we didn't do anything impossible here
@@ -317,18 +331,23 @@ class StockTradingEnvCashpenalty(gym.Env):
             )
             self.state_memory.append(state)
             return state, reward, False, {}
+
     def get_sb_env(self):
         def get_self():
             return deepcopy(self)
+
         e = DummyVecEnv([get_self])
         obs = e.reset()
         return e, obs
+
     def get_multiproc_env(self, n=10):
         def get_self():
             return deepcopy(self)
+
         e = SubprocVecEnv([get_self for _ in range(n)], start_method="fork")
         obs = e.reset()
         return e, obs
+
     def save_asset_memory(self):
         if self.current_step == 0:
             return None
@@ -337,6 +356,7 @@ class StockTradingEnvCashpenalty(gym.Env):
                 -len(self.account_information["cash"]) :
             ]
             return pd.DataFrame(self.account_information)
+
     def save_action_memory(self):
         if self.current_step == 0:
             return None
