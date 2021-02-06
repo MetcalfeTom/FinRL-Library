@@ -1,5 +1,4 @@
-import pickle
-
+from typing import Dict, List
 import gym
 import matplotlib
 import matplotlib.pyplot as plt
@@ -35,10 +34,11 @@ class StockTradingEnv(gym.Env):
         print_verbosity=10,
         day=0,
         initial=True,
-        previous_state=[],
+        previous_state=None,
         model_name="",
         mode="",
         iteration="",
+        news_encodings: Dict[int, List[float]] = None
     ):
         self.day = day
         self.df = df
@@ -50,18 +50,21 @@ class StockTradingEnv(gym.Env):
         self.reward_scaling = reward_scaling
         self.state_space = state_space
         self.action_space = action_space
+        self.news_encodings = news_encodings or {}
         self.tech_indicator_list = tech_indicator_list
         self.action_space = spaces.Box(low=-1, high=1, shape=(self.action_space,))
         self.observation_space = spaces.Box(
             low=-np.inf, high=np.inf, shape=(self.state_space,)
         )
         self.data = self.df.loc[self.day, :]
+        date = self.data.date.values[0]
+        self.encodings = self.news_encodings.get(date)
         self.terminal = False
         self.make_plots = make_plots
         self.print_verbosity = print_verbosity
         self.turbulence_threshold = turbulence_threshold
         self.initial = initial
-        self.previous_state = previous_state
+        self.previous_state = previous_state or []
         self.model_name = model_name
         self.mode = mode
         self.iteration = iteration
@@ -307,6 +310,8 @@ class StockTradingEnv(gym.Env):
 
             self.day += 1
             self.data = self.df.loc[self.day, :]
+            date = self.data.date.values[0]
+            self.encodings = self.news_encodings.get(date)
             if self.turbulence_threshold is not None:
                 self.turbulence = self.data["turbulence"].values[0]
             self.state = self._update_state()
@@ -340,6 +345,8 @@ class StockTradingEnv(gym.Env):
 
         self.day = 0
         self.data = self.df.loc[self.day, :]
+        date = self.data.date.values[0]
+        self.encodings = self.news_encodings.get(date)
         self.turbulence = 0
         self.cost = 0
         self.trades = 0
@@ -409,6 +416,9 @@ class StockTradingEnv(gym.Env):
                     ]
                     + sum([[self.data[tech]] for tech in self.tech_indicator_list], [])
                 )
+
+        if self.news_encodings:
+            state += self.encodings
         return state
 
     def _update_state(self):
@@ -435,6 +445,9 @@ class StockTradingEnv(gym.Env):
                 + list(self.state[(self.stock_dim + 1) : (self.stock_dim * 2 + 1)])
                 + sum([[self.data[tech]] for tech in self.tech_indicator_list], [])
             )
+
+        if self.news_encodings:
+            state += self.encodings
 
         return state
 
